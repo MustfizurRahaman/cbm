@@ -1,0 +1,10 @@
+# data and model runs stay local
+data/
+runs/
+outputs/
+*.mdb
+*.ldb
+*.accdb
+
+.ipynb_checkpoints/
+__pycache__/
