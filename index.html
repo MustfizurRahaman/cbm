@@ -749,7 +749,7 @@ sit_disturbance_types.csv</pre>
             <li>Carbon is in tonnes of carbon (t C), not tonnes of biomass; biomass is roughly twice the carbon.</li>
             <li>Results stop at 2010. The inventories record harvest and fire up to 2009 in Wabigoon and 2010 in Trout Lake, so later years of the runs carry growth and decay only and are left out.</li>
             <li>Every stand uses one of two generic yield curves, so differences between species and site classes are not modelled.</li>
-            <!-- <li>Trout Lake results come from one of its three inventory stacks (<span data-bind="tlRunHa">450,202</span> of <span data-bind="tlForestHa">828,214</span> ha). The run's other two stacks were imported from the same inputs, so they repeat it and are counted once here. Per-hectare values stand; Trout Lake totals cover that part only.</li> -->
+            <li>The exported 2010 biomass product stores biomass carbon (t C/ha) under a Mg/ha label. Relabel it, or roughly double the values, before using it as dry biomass.</li>
             <li>Blowdown, drought and flood map to CBM's "Unknown" disturbance type: they reset stand age but move no carbon in these runs.</li>
             <li>Harvest is modelled as clear-cut with slash-burn, so every harvest also burns its slash; that burning is most of the disturbance emissions.</li>
             <li>Stands that originated after 2000 start the run at 100 years old, then reset when their recorded disturbance happens.</li>
@@ -759,7 +759,6 @@ sit_disturbance_types.csv</pre>
         <div>
           <h3>Next steps</h3>
           <ul class="plain">
-            <!-- <li>Run Trout Lake stacks 2 and 3 with their disturbance events and replace the single-stack totals.</li> -->
             <li>Replace the two generic yield curves with Ontario growth and yield curves by species and site class.</li>
             <li>Add harvest and fire after 2010, from the annual reports or national satellite records, to carry the story forward.</li>
           </ul>
@@ -940,7 +939,7 @@ const S = {"hero":{"w":679,"h":1082,"res":250,"fmus":[{"key":"troutlake","name":
   addLabel(hero.labels, HP, [rc[0] + rc[2] / 2, rc[1] + rc[3] + 12], 'Close-up', 'box', 3);
   HP.towns.forEach(t => addTown(hero.labels, HP, t));
   scaleBar(hero.map, HP);
-  $('#hero-legend').innerHTML = carbonKey('Biomass carbon') + kk(LG.norun, 'Forest outside the Trout Lake run') + kk(LG.water, 'Water') +
+  $('#hero-legend').innerHTML = carbonKey('Biomass carbon') + kk(LG.norun, 'Trout Lake stacks 2–3 (growth-only run)') + kk(LG.water, 'Water') +
     knote('Aboveground plus root biomass per hectare in each 250 m cell, averaged over the forest stands in it. The small box marks the close-up used to explain the method.');
 
   /* ---------- explorer ---------- */
@@ -969,10 +968,10 @@ const S = {"hero":{"w":679,"h":1082,"res":250,"fmus":[{"key":"troutlake","name":
     species: e => { const s = shareOf(e.species); return LG.species.map((c, i) => kk(c.color, c.label, fmt(s[i], 1) + '%')).join('') + knote('Share of productive forest area by leading species. The species group, not the species, picks the growth curve.'); },
     age: e => { const s = shareOf(e.ages); return LG.ages.map((c, i) => kk(c.color, c.label, fmt(s[i], 0) + '%')).join('') + knote('Stand age in 2000, in years. Area-weighted mean ' + fmt(e.mean_age, 0) + ' years.'); },
     events: e => { const t = eventTotals(e); return LG.dist.map(d => kk(d.color, d.label, fmt(t[d.key]) + ' ha')).join('') + knote('Depletions recorded in the inventory from 2001 to ' + e.fri_year + ', each applied in its year.'); },
-    bio2000: e => carbonKey('Biomass carbon') + kk(LG.norun, 'Forest outside the run') + knote('Run mean ' + fmt(e.bio2000, 1) + ' t C/ha in 2000.'),
-    bio2005: e => carbonKey('Biomass carbon') + kk(LG.norun, 'Forest outside the run') + knote('Run mean ' + fmt(e.bio2005, 1) + ' t C/ha in 2005 (' + signed(e.bio2005 - e.bio2000) + ' since 2000).'),
-    bio2010: e => carbonKey('Biomass carbon') + kk(LG.norun, 'Forest outside the run') + knote('Run mean ' + fmt(e.bio2010, 1) + ' t C/ha in 2010 (' + signed(e.bio2010 - e.bio2000) + ' since 2000).'),
-    dbio: e => '<span class="gradkey"><span>Change</span><span class="bar" style="background:' + changeGrad + '"></span><span class="ticks"><span>−' + LG.change_max + '</span><span>0</span><span>+' + LG.change_max + ' t C/ha</span></span></span>' + kk(LG.norun, 'Forest outside the run') +
+    bio2000: e => carbonKey('Biomass carbon') + kk(LG.norun, 'Stands without events in the run') + knote('Run mean ' + fmt(e.bio2000, 1) + ' t C/ha in 2000.'),
+    bio2005: e => carbonKey('Biomass carbon') + kk(LG.norun, 'Stands without events in the run') + knote('Run mean ' + fmt(e.bio2005, 1) + ' t C/ha in 2005 (' + signed(e.bio2005 - e.bio2000) + ' since 2000).'),
+    bio2010: e => carbonKey('Biomass carbon') + kk(LG.norun, 'Stands without events in the run') + knote('Run mean ' + fmt(e.bio2010, 1) + ' t C/ha in 2010 (' + signed(e.bio2010 - e.bio2000) + ' since 2000).'),
+    dbio: e => '<span class="gradkey"><span>Change</span><span class="bar" style="background:' + changeGrad + '"></span><span class="ticks"><span>−' + LG.change_max + '</span><span>0</span><span>+' + LG.change_max + ' t C/ha</span></span></span>' + kk(LG.norun, 'Stands without events in the run') +
       knote('Biomass carbon in 2010 minus 2000. Plum stands lost biomass to harvest or fire in the decade; green stands grew.'),
   };
   let exFmu = 'wabigoon', exLayer = 'species';
@@ -1025,7 +1024,7 @@ const S = {"hero":{"w":679,"h":1082,"res":250,"fmus":[{"key":"troutlake","name":
     $('#card-facts').innerHTML = [
       ['Unit area', fmt(e.fmu_ha / 1e6, 2) + ' Mha', fmt(e.fmu_ha) + ' ha'],
       ['Productive forest', fmt(e.forest_ha / 1000) + 'k ha', fmt(e.forest_polygons) + ' stands'],
-      ['In the carbon run', fmt(s.area_ha / 1000) + 'k ha', k === 'troutlake' ? 'one of three stacks' : 'all three stacks'],
+      ['In the carbon run', fmt(s.area_ha / 1000) + 'k ha', k === 'troutlake' ? 'stack 1 of 3, with events' : 'all three stacks, with events'],
       ['Ecosystem carbon', fmt(eco0, 0) + ' → ' + fmt(eco30, 0), 't C/ha, 2000 → 2010'],
     ].map(f => '<div><dt>' + f[0] + '</dt><dd>' + f[1] + '<small>' + f[2] + '</small></dd></div>').join('');
     $('#glance-title').textContent = e.name + ' inventory at a glance';
@@ -1161,7 +1160,7 @@ const S = {"hero":{"w":679,"h":1082,"res":250,"fmus":[{"key":"troutlake","name":
     steps.forEach((s, j) => s.classList.toggle('on', j === i));
     const mt = STEP_META[i];
     $('#detail-title').textContent = mt.title;
-    $('#detail-legend').innerHTML = mt.change ? LEGEND.dbio(EX.wabigoon).replace(/<span class="key">.*?Forest outside the run<\/span>/, '') :
+    $('#detail-legend').innerHTML = mt.change ? LEGEND.dbio(EX.wabigoon).replace(/<span class="key">.*?Stands without events in the run<\/span>/, '') :
       mt.grad ? carbonKey('Biomass carbon') + kk(LG.water, 'Water') : mt.keys.map(k => kk(k[0], k[1])).join('');
   }
   setStep(0);
